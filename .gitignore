@@ -19,3 +19,7 @@ db.sqlite3
 
 # Visual Studio Code specific
 .vscode/
+
+
+#Django admin (Currently not using)
+static/admin/
