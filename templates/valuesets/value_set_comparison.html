@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Value Set Comparison</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .comparison-table th {
+            background-color: #f2f2f2;
+        }
+        .value-set-column {
+            vertical-align: top;
+        }
+        .medication-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .medication-list li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{% static 'logo-VUMC.png' %}" alt="Vanderbilt Logo">
+        <h1>Value Set Comparison</h1>
+    </header>
+    <main>
+        <button class="back-button" onclick="history.back()">Back</button>
+        <form method="get" class="comparison-form">
+            <label for="value_set_ids">Select value sets to compare:</label>
+            <select name="value_set_ids" id="value_set_ids" multiple>
+                {% for value_set in value_sets %}
+                    <option value="{{ value_set.value_set_id }}">{{ value_set.value_set_name }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Compare</button>
+        </form>
+
+        {% if selected_value_sets %}
+            <h2>Comparison Results</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Value Set Name</th>
+                        {% for value_set in selected_value_sets %}
+                            <th>{{ value_set.value_set_name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Medications</td>
+                        {% for value_set in selected_value_sets %}
+                            <td>{{ value_set.medications.count }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td>Medications</td>
+                        {% for value_set in selected_value_sets %}
+                            <td class="value-set-column">
+                                <ul class="medication-list">
+                                {% for medication in value_set.medications.all %}
+                                    <li>{{ medication.medname }} ({{ medication.simple_generic_name }} - {{ medication.route }})</li>
+                                {% endfor %}
+                                </ul>
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td colspan="{{ column_span }}">
+                            <h3>Common Medications</h3>
+                            <p>Medications that are present in all selected value sets.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Common Medications</td>
+                        <td colspan="{{ column_span }}">
+                            <ul class="medication-list">
+                                {% if common_medications %}
+                                    {% for medication in common_medications %}
+                                        <li>{{ medication.medname }} ({{ medication.simple_generic_name }})</li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li>No common medications found.</li>
+                                {% endif %}
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Percentage of Patients Taking Medications</h2>
+            <canvas id="patientsChart"></canvas>
+        {% endif %}
+    </main>
+    <script>
+        {% if selected_value_sets %}
+        var ctx = document.getElementById('patientsChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [{% for value_set in selected_value_sets %}'{{ value_set.value_set_name }}',{% endfor %}],
+                datasets: [{
+                    label: 'Percentage of Patients',
+                    data: [{% for value_set in selected_value_sets %}{{ value_set.total_patients_percentage }},{% endfor %}],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Value Set List</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{% static 'logo-VUMC.png' %}" alt="Vanderbilt Logo">
+        <h1>Value Set List</h1>
+    </header>
+    <main>
+        <form method="get" class="search-form" onsubmit="highlightSearch()">
+            <label for="search">Search value sets by name or medication:</label>
+            <input type="text" name="search" id="search" placeholder="Enter value set name or medication name" value="{{ search_query }}">
+            <button type="submit">Search</button>
+        </form>
+        
+        <a href="{% url 'value_set_comparison' %}" class="compare-link">Compare Value Sets</a>
+
+        {% if value_sets %}
+            <ul class="value-set-list" id="valueSetList">
+            {% for value_set in value_sets %}
+                <li>
+                    <a href="{% url 'value_set_detail' value_set.value_set_id %}" class="value-set-name">{{ value_set.value_set_name }}</a>
+                    <span class="medication-count">({{ value_set.medications.count }} medications)</span>
+                    <ul>
+                    {% for medication in value_set.medications.all|slice:":5" %}
+                        <li class="medication-name">{{ medication.medname }} ({{ medication.simple_generic_name }} - {{ medication.route }})</li>
+                    {% endfor %}
+                    {% if value_set.medications.count > 5 %}
+                        <li><a href="{% url 'value_set_detail' value_set.value_set_id %}">View all medications</a></li>
+                    {% endif %}
+                    </ul>
+                </li>
+            {% endfor %}
+            </ul>
+
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                        <a href="?page=1">&laquo; First</a>
+                        <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    {% endif %}
+
+                    <span class="current-page">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        {% else %}
+            <p>No value sets found. Please try a different search term.</p>
+        {% endif %}
+    </main>
+    <script>
+        function highlightSearch() {
+            const searchQuery = document.getElementById("search").value.toLowerCase();
+            if (searchQuery) {
+                const valueSetNames = document.querySelectorAll(".value-set-name");
+                const medicationNames = document.querySelectorAll(".medication-name");
+
+                valueSetNames.forEach(name => {
+                    const text = name.textContent.toLowerCase();
+                    if (text.includes(searchQuery)) {
+                        const regex = new RegExp(`(${searchQuery})`, 'gi');
+                        name.innerHTML = name.textContent.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                });
+
+                medicationNames.forEach(name => {
+                    const text = name.textContent.toLowerCase();
+                    if (text.includes(searchQuery)) {
+                        const regex = new RegExp(`(${searchQuery})`, 'gi');
+                        name.innerHTML = name.textContent.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                });
+            }
+        }
+
+        // Automatically highlight search results when the page loads if a search query is present
+        window.onload = highlightSearch;
+    </script>
+</body>
+</html>

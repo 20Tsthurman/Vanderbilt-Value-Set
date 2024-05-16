@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Value Set Details</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <style>
+        .medication-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .medication-table th, .medication-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            cursor: pointer;
+        }
+        .medication-table th {
+            background-color: #f2f2f2;
+            position: relative;
+        }
+        .medication-table th .sort-indicator {
+            margin-left: 5px;
+            font-size: 0.8em;
+        }
+        .section-header {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #0c2340; /* Vanderbilt blue */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{% static 'logo-VUMC.png' %}" alt="Vanderbilt Logo">
+        <h1>{{ value_set.value_set_name }}</h1>
+    </header>
+    <main>
+        <button class="back-button" onclick="history.back()">Back</button>
+        <h2 class="section-header">Medications</h2>
+        <table class="medication-table" id="medicationTable">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Medication Name<span class="sort-indicator"></span></th>
+                    <th onclick="sortTable(1)">Generic Name<span class="sort-indicator"></span></th>
+                    <th onclick="sortTable(2)">Route<span class="sort-indicator"></span></th>
+                    <th onclick="sortTable(3)">Outpatients<span class="sort-indicator"></span></th>
+                    <th onclick="sortTable(4)">Inpatients<span class="sort-indicator"></span></th>
+                    <th onclick="sortTable(5)">Total Patients<span class="sort-indicator"></span></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for medication in value_set.medications.all %}
+                <tr>
+                    <td>{{ medication.medname }}</td>
+                    <td>{{ medication.simple_generic_name }}</td>
+                    <td>{{ medication.route }}</td>
+                    <td>{{ medication.outpatients }}</td>
+                    <td>{{ medication.inpatients }}</td>
+                    <td>{{ medication.patients }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </main>
+    <script>
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("medicationTable");
+            switching = true;
+            dir = "asc";
+            var headers = table.getElementsByTagName("th");
+            for (i = 0; i < headers.length; i++) {
+                headers[i].getElementsByClassName("sort-indicator")[0].innerHTML = "";
+            }
+            headers[n].getElementsByClassName("sort-indicator")[0].innerHTML = dir === "asc" ? "▲" : "▼";
+            
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    if (dir == "asc") {
+                        if (compareCells(x, y, n)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (compareCells(y, x, n)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                        headers[n].getElementsByClassName("sort-indicator")[0].innerHTML = "▼";
+                    }
+                }
+            }
+        }
+
+        function compareCells(x, y, n) {
+            var xContent = x.innerHTML.toLowerCase();
+            var yContent = y.innerHTML.toLowerCase();
+            if (n >= 3) { // Numeric columns (Outpatients, Inpatients, Total Patients)
+                return parseFloat(xContent) > parseFloat(yContent);
+            } else { // Text columns
+                return xContent > yContent;
+            }
+        }
+    </script>
+</body>
+</html>
