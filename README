@@ -1,0 +1,68 @@
+# Vanderbilt Value Set Project
+
+Hey there! This is a Django-based web app that helps users find, view, compare, and select value sets for different medical use cases. I tried to keep it simple and user-friendly, with some cool features like:
+
+
+## Features
+
+- **Search and Filter**: Easily search and filter value sets by name or medication.
+- **Pagination**: Browse through value sets with easy pagination.
+- **Detailed Views**: Get detailed information about each value set and its medications.
+- **Comparison**: Compare multiple value sets and see common medications.
+- **Interactive Charts**: Visualize data with beautiful bar charts powered by Chart.js.
+
+## Getting Started
+
+Follow these steps to get the project up and running on your local machine.
+
+### Prerequisites
+
+- Python 3.x
+- Django
+- Virtualenv (optional but recommended)
+
+### Installation
+
+1. **Clone the repo**:
+
+    git clone https://github.com/20Tsthurman/Vanderbilt-Value-Set.git
+
+2. **Set up a virtual environment**:
+
+    ```sh
+    python -m venv venv
+    source venv/bin/activate   # On macOS/Linux
+    venv\Scripts\activate      # On Windows
+    ```
+
+3. **Install the dependencies**:
+
+    pip install -r requirements.txt
+
+4. **Run the migrations**:
+
+    python manage.py migrate
+
+5. **Load initial data** (if applicable):
+
+    python manage.py loaddata initial_data.json
+
+6. **Start the development server**:
+
+    python manage.py runserver
+
+7. **Open your browser** and navigate to `http://127.0.0.1:8000` to see the app in action.
+
+## Usage
+
+- **Search**: Use the search bar on the value sets page to find specific value sets.
+- **Pagination**: Navigate through pages using the pagination controls at the bottom.
+- **Detail View**: Click on a value set to view detailed information.
+- **Compare**: Select multiple value sets and click the "Compare" button to see common medications and patient data.
+- **Charts**: Check out the interactive bar chart showing the percentage of patients taking medications in the selected value sets.
+
+## Acknowledgments
+
+Big thanks to the Vanderbilt team for the inspiration and data.
+Happy coding! 🚀
+

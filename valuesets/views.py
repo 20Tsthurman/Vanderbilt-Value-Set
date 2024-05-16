@@ -12,10 +12,10 @@ def value_set_list(request):
         value_sets = ValueSet.objects.filter(
             Q(value_set_name__icontains=search_query) |
             Q(medications__medname__icontains=search_query)
-        ).distinct()
+        ).distinct().order_by('value_set_name')  # Add ordering here
     else:
         # If no search query is provided, retrieve all value sets ordered by name
-        value_sets = ValueSet.objects.all().order_by('value_set_name')
+        value_sets = ValueSet.objects.all().order_by('value_set_name')  # Ensure ordering here
     
     # Create a paginator object to split the value sets into pages
     paginator = Paginator(value_sets, 10)  # Show 10 value sets per page
